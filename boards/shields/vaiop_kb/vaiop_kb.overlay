@@ -1,0 +1,75 @@
+#include <dt-bindings/zmk/matrix_transform.h>
+
+/ {
+    chosen {
+        zmk,kscan = &kscan0;
+        zmk,matrix-transform = &default_transform;
+    };
+
+    default_transform: keymap_transform_0 {
+        compatible = "zmk,matrix-transform";
+        columns = <8>;
+        rows = <13>;
+        /* keymap は vaiop_kb.keymap で定義 */
+    };
+
+    kscan0: kscan {
+        compatible = "zmk,kscan-gpio-matrix";
+        wakeup-source;
+        diode-direction = "col2row";
+
+        col-gpios
+            = <&xiao_d  2 GPIO_ACTIVE_HIGH>   /* Col 0 - FPC 21 */
+            , <&xiao_d  3 GPIO_ACTIVE_HIGH>   /* Col 1 - FPC 20 */
+            , <&xiao_d  6 GPIO_ACTIVE_HIGH>   /* Col 2 - FPC 19 */
+            , <&xiao_d  7 GPIO_ACTIVE_HIGH>   /* Col 3 - FPC 18 */
+            , <&xiao_d  8 GPIO_ACTIVE_HIGH>   /* Col 4 - FPC 17 */
+            , <&xiao_d  9 GPIO_ACTIVE_HIGH>   /* Col 5 - FPC 16 */
+            , <&xiao_d 10 GPIO_ACTIVE_HIGH>   /* Col 6 - FPC 15 */
+            , <&gpio0   9 GPIO_ACTIVE_HIGH>   /* Col 7 - FPC 14 (Plus castellated P0.09 ※要確認) */
+            ;
+
+        row-gpios
+            = <&mcp23017  0 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>  /* Row 0  - FPC 30 */
+            , <&mcp23017  1 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>  /* Row 1  - FPC 29 */
+            , <&mcp23017  2 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>  /* Row 2  - FPC 28 */
+            , <&mcp23017  3 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>  /* Row 3  - FPC 27 */
+            , <&mcp23017  4 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>  /* Row 4  - FPC 26 */
+            , <&mcp23017  5 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>  /* Row 5  - FPC 25 */
+            , <&mcp23017  6 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>  /* Row 6  - FPC 24 */
+            , <&mcp23017  7 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>  /* Row 7  - FPC 23 */
+            , <&mcp23017  8 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>  /* Row 8  - FPC 22 */
+            , <&mcp23017  9 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>  /* Row 9  - FPC 13 */
+            , <&mcp23017 10 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>  /* Row 10 - FPC 8  */
+            , <&mcp23017 11 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>  /* Row 11 - FPC 7+12 merged */
+            , <&mcp23017 12 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>  /* Row 12 - FPC 9+10+11 merged */
+            ;
+    };
+};
+
+&i2c0 {
+    status = "okay";
+    pinctrl-0 = <&i2c0_default>;
+    pinctrl-names = "default";
+    clock-frequency = <I2C_BITRATE_FAST>;
+
+    mcp23017: mcp23017@20 {
+        compatible = "microchip,mcp230xx";
+        reg = <0x20>;
+        gpio-controller;
+        #gpio-cells = <2>;
+        ngpios = <16>;
+        /* GPA0〜GPA7 : Row 0〜7          */
+        /* GPB0〜GPB4 : Row 8〜12         */
+        /* GPB5〜GPB7 : マウスボタン予約  */
+    };
+};
+
+&pinctrl {
+    i2c0_default: i2c0_default {
+        group1 {
+            psels = <NRF_PSEL(TWIM_SDA, 0, 4)>,   /* D4 = P0.04 */
+                    <NRF_PSEL(TWIM_SCL, 0, 5)>;    /* D5 = P0.05 */
+        };
+    };
+};
