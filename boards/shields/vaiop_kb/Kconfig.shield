@@ -1,0 +1,2 @@
+config SHIELD_VAIOP_KB
+    def_bool $(shields_list_contains,vaiop_kb)
